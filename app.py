@@ -22,8 +22,11 @@ def query_huggingface(prompt, token, model_id):
     headers = {"Authorization": f"Bearer {token}"}
     payload = {"inputs": prompt}
     
-    response = requests.post(API_URL, headers=headers, json=payload)
-    return response
+    try:
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+        return response
+    except requests.exceptions.RequestException as e:
+        return None
 
 if st.button("Generate Video"):
     if not hf_token:
@@ -31,15 +34,17 @@ if st.button("Generate Video"):
     elif not prompt:
         st.warning("Koshish karein ke koi prompt zaroor daalein!")
     else:
-        with st.spinner("AI Video bana raha hai... (Pehli baar 1-2 minute lag sakte hain)"):
+        with st.spinner("AI Video bana raha hai... (Pehli baar model load hone mein 1-2 minute lag sakte hain)"):
             res = query_huggingface(prompt, hf_token, model_choice)
             
-            if res.status_code == 200:
+            if res is None:
+                st.error("Network connection error! Dobara koshish karein.")
+            elif res.status_code == 200:
                 with open("output.mp4", "wb") as f:
                     f.write(res.content)
                 st.success("Video successfully generate ho gayi!")
                 st.video("output.mp4")
             elif res.status_code == 503:
-                st.info("Model load ho raha hai, bara-e-karam 30 seconds baad dobara try karein.")
+                st.info("Model warm-up ho raha hai, bara-e-karam 30 seconds baad dobara 'Generate Video' dabayein.")
             else:
                 st.error(f"Error ({res.status_code}): {res.text}")
