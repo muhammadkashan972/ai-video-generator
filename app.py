@@ -14,15 +14,15 @@ model_choice = st.sidebar.selectbox(
     "Select Model:",
     [
         "stabilityai/stable-diffusion-xl-base-1.0",
-        "CompVis/stable-diffusion-v1-4"
+        "runwayml/stable-diffusion-v1-5"
     ]
 )
 
 prompt = st.text_area("Description (Prompt):", "A cinematic slow-motion shot of a confident young man in a sharp black suit walking out of a modern glass skyscraper, luxury sports cars parked in the background, 4k, ultra-realistic")
 
-def query_free_huggingface(prompt, token, model_id):
-    # Direct free serverless endpoint URL (no third-party paid providers)
-    API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
+def query_huggingface(prompt, token, model_id):
+    # Correct Working Router Endpoint
+    API_URL = f"https://router.huggingface.co/hf-inference/models/{model_id}"
     headers = {"Authorization": f"Bearer {token}"}
     payload = {"inputs": prompt}
     
@@ -39,7 +39,7 @@ if st.button("Generate Visual"):
         st.warning("Koshish karein ke koi prompt zaroor daalein!")
     else:
         with st.spinner("AI visual generate ho rahi hai... (10-30 seconds lag sakte hain)"):
-            res = query_free_huggingface(prompt, hf_token, model_choice)
+            res = query_huggingface(prompt, hf_token, model_choice)
             
             if isinstance(res, str):
                 st.error(f"Connection Error: {res}")
