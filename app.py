@@ -12,18 +12,18 @@ hf_token = st.sidebar.text_input("Enter Hugging Face Token:", type="password")
 # Model Selection
 model_choice = st.sidebar.selectbox(
     "Select Model:",
-    ["damo-vilab/text-to-video-ms-1.7b", "stabilityai/stable-diffusion-xl-base-1.0"]
+    ["damo-vilab/text-to-video-ms-1.7b", "guoyww/animatediff-motion-adapter-v1-5-2"]
 )
 
 prompt = st.text_area("Video Description (Prompt):", "A cinematic slow-motion shot of a confident young man in a sharp black suit walking out of a modern glass skyscraper, luxury sports cars parked in the background, 4k")
 
 def query_huggingface(prompt, token, model_id):
-    API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
+    # Updated Hugging Face Router API URL
+    API_URL = f"https://router.huggingface.co/hf-inference/models/{model_id}"
     headers = {"Authorization": f"Bearer {token}"}
     payload = {"inputs": prompt}
     
     try:
-        # Timeout ko 120 seconds kar diya hai taake model load hone ka waqt mil jaye
         response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
         return response
     except Exception as e:
