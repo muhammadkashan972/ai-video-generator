@@ -9,12 +9,11 @@ st.write("Hugging Face AI models se bilkul free cinematic visuals generate karei
 # Sidebar for Token
 hf_token = st.sidebar.text_input("Enter Hugging Face Token:", type="password")
 
-# Model Selection (Using active serverless models)
+# Model Selection (Current Active Free Model)
 model_choice = st.sidebar.selectbox(
     "Select Model:",
     [
-        "CompVis/stable-diffusion-v1-4",
-        "stabilityai/stable-diffusion-2-1"
+        "stabilityai/stable-diffusion-2"
     ]
 )
 
