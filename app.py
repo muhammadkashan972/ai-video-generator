@@ -9,7 +9,7 @@ st.write("Hugging Face AI models se bilkul free cinematic visuals generate karei
 # Sidebar for Token
 hf_token = st.sidebar.text_input("Enter Hugging Face Token:", type="password")
 
-# Model Selection (Free Serverless Models)
+# Model Selection (Active Free Router Models)
 model_choice = st.sidebar.selectbox(
     "Select Model:",
     [
@@ -21,8 +21,8 @@ model_choice = st.sidebar.selectbox(
 prompt = st.text_area("Description (Prompt):", "A cinematic slow-motion shot of a confident young man in a sharp black suit walking out of a modern glass skyscraper, luxury sports cars parked in the background, 4k, ultra-realistic")
 
 def query_huggingface(prompt, token, model_id):
-    # Standard Free Serverless Endpoint
-    API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
+    # Updated Working Router Endpoint
+    API_URL = f"https://router.huggingface.co/hf-inference/models/{model_id}"
     headers = {"Authorization": f"Bearer {token}"}
     payload = {"inputs": prompt}
     
