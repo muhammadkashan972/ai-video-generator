@@ -9,13 +9,13 @@ st.write("Hugging Face AI models se bilkul free cinematic visuals generate karei
 # Sidebar for Token
 hf_token = st.sidebar.text_input("Enter Hugging Face Token:", type="password")
 
-# Model Selection (Supported Serverless Models)
+# Model Selection (Active Serverless Models)
 model_choice = st.sidebar.selectbox(
     "Select Model:",
     [
-        "black-forest-labs/FLUX.1-schnell",
         "stabilityai/stable-diffusion-xl-base-1.0",
-        "runwayml/stable-diffusion-v1-5"
+        "runwayml/stable-diffusion-v1-5",
+        "stabilityai/stable-diffusion-2-1"
     ]
 )
 
@@ -39,7 +39,7 @@ if st.button("Generate Visual"):
         st.warning("Koshish karein ke koi prompt zaroor daalein!")
     else:
         with st.spinner("AI visual generate ho rahi hai... (10-20 seconds lag sakte hain)"):
-            res = query_hungeon = query_huggingface(prompt, hf_token, model_choice)
+            res = query_huggingface(prompt, hf_token, model_choice)
             
             if isinstance(res, str):
                 st.error(f"Connection Error: {res}")
