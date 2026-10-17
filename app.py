@@ -1,52 +1,89 @@
+
+import os
 import streamlit as st
-import requests
+from huggingface_hub import InferenceClient
 
-st.set_page_config(page_title="Free AI Visual Generator", layout="centered")
-
-st.title("🎬 Free AI Cinematic Visual Generator")
-st.write("Hugging Face AI models se bilkul free cinematic visuals generate karein!")
-
-# Sidebar for Token
-hf_token = st.sidebar.text_input("Enter Hugging Face Token:", type="password")
-
-# Model Selection (Current Active Free Model)
-model_choice = st.sidebar.selectbox(
-    "Select Model:",
-    [
-        "stabilityai/stable-diffusion-2"
-    ]
+st.set_page_config(
+    page_title="AI Video Generator",
+    page_icon="🎬",
+    layout="centered"
 )
 
-prompt = st.text_area("Description (Prompt):", "A cinematic slow-motion shot of a confident young man in a sharp black suit walking out of a modern glass skyscraper, luxury sports cars parked in the background, 4k, ultra-realistic")
+st.title("🎬 AI Cinematic Video Generator")
+st.write("Apna prompt likhein aur AI se video generate karein.")
 
-def query_huggingface(prompt, token, model_id):
-    API_URL = f"https://router.huggingface.co/hf-inference/models/{model_id}"
-    headers = {"Authorization": f"Bearer {token}"}
-    payload = {"inputs": prompt}
-    
+# Token ko environment variable ya Streamlit Secrets se read karein
+saved_token = os.getenv("HF_TOKEN", "")
+
+if not saved_token:
     try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
-        return response
-    except Exception as e:
-        return str(e)
+        saved_token = st.secrets.get("HF_TOKEN", "")
+    except Exception:
+        saved_token = ""
 
-if st.button("Generate Visual"):
-    if not hf_token:
-        st.error("Pehle sidebar mein apna Hugging Face Token daalein!")
-    elif not prompt:
-        st.warning("Koshish karein ke koi prompt zaroor daalein!")
+with st.sidebar:
+    st.header("Settings")
+    user_token = st.text_input(
+        "Hugging Face Token",
+        type="password",
+        help="Token ko GitHub code mein kabhi save na karein."
+    )
+
+    st.caption("Supported provider aur model ki availability zaroor check karein.")
+
+    model_id = "Wan-AI/Wan2.2-TI2V-5B"
+
+prompt = st.text_area(
+    "Video Description",
+    value=(
+        "A cinematic shot of a young man walking out of a "
+        "modern glass skyscraper, luxury cars in the background, "
+        "realistic lighting, smooth camera movement."
+    ),
+    height=140
+)
+
+if st.button("Generate AI Video", type="primary"):
+    token = user_token.strip() or saved_token.strip()
+
+    if not token:
+        st.error("Sidebar mein Hugging Face token enter karein.")
+    elif not prompt.strip():
+        st.warning("Pehle video ka prompt likhein.")
     else:
-        with st.spinner("AI visual generate ho rahi hai... (10-30 seconds lag sakte hain)"):
-            res = query_huggingface(prompt, hf_token, model_choice)
-            
-            if isinstance(res, str):
-                st.error(f"Connection Error: {res}")
-            elif res.status_code == 200:
-                with open("output.jpg", "wb") as f:
-                    f.write(res.content)
-                st.success("Visual successfully generate ho gayi!")
-                st.image("output.jpg", caption=prompt, use_column_width=True)
-            elif res.status_code == 503:
-                st.info("Model warm-up ho raha hai. 30 seconds baad dobara 'Generate Visual' button dabayein.")
+        try:
+            with st.spinner(
+                "Video generate ho rahi hai. Is mein kuch waqt lag sakta hai..."
+            ):
+                client = InferenceClient(
+                    provider="fal-ai",
+                    api_key=token,
+                    timeout=600
+                )
+
+                video_bytes = client.text_to_video(
+                    prompt=prompt.strip(),
+                    model=model_id
+                )
+
+            if not video_bytes:
+                st.error("Provider ne empty video return ki.")
             else:
-                st.error(f"Hugging Face Error ({res.status_code}): {res.text}")
+                st.success("Video generate ho gayi!")
+                st.video(video_bytes)
+                st.download_button(
+                    label="Download MP4 Video",
+                    data=video_bytes,
+                    file_name="ai_generated_video.mp4",
+                    mime="video/mp4"
+                )
+
+        except Exception as e:
+            error_text = str(e)
+            st.error("Video generate nahi ho saki.")
+            st.code(error_text[:1500])
+
+            st.info(
+                "Token permission, provider/model availability aur "
+                "account ki usage limits check karein."
+            )
